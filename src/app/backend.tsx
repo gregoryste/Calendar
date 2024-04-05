@@ -13,13 +13,13 @@ export interface IEvent {
 }
 
 export function getCalendarsEndpoint(): Promise<ICalendar[]>{ 
-    return fetch("https://localhost:8080/calendars").then(response => {
+    return fetch("http://localhost:7000/calendars").then(response => {
         return response.json();
     })
 }
 
-export function getEventsEndpoint(): Promise<IEvent[]>{ 
-    return fetch("https://localhost:8080/events").then(response => {
+export function getEventsEndpoint(from: string, to: string): Promise<IEvent[]>{ 
+    return fetch(`http://localhost:7000/events?date_gte=${from}&date_lte=${to}&_sort=date,time`).then(response => {
         return response.json();
     })
 }

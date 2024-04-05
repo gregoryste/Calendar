@@ -2,6 +2,8 @@ import Table from '@mui/material/Table';
 import TableRow from '@mui/material/TableRow';
 import { TableBody, TableCell, TableContainer, TableHead, makeStyles} from "@material-ui/core";
 import { Avatar, Box, Button, Checkbox, FormControlLabel, FormGroup, Icon, IconButton, Typography } from '@mui/material';
+import { useEffect, useState } from 'react';
+import { IEvent, getEventsEndpoint } from './backend';
 
 const daysWeek = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sab"];
 
@@ -27,7 +29,15 @@ const useStyles = makeStyles({
 
 export function CalendarScreen(){
     const classes = useStyles();
-    const weeks = generateCalendar(getToday());
+    const [events, setEvents] = useState<IEvent[]>([]);
+    const weeks = generateCalendar(getToday(), events)
+    const firstDate = weeks[0][0].date;
+    const lastDate = weeks[weeks.length - 1][6].date;
+
+
+    useEffect(() => {
+        getEventsEndpoint(firstDate, lastDate).then(setEvents)
+    }, [firstDate, lastDate]);
 
     return (
         <>
@@ -73,7 +83,17 @@ export function CalendarScreen(){
                         {weeks.map((week, i) => (
                             <TableRow>      
                                 {week.map(cell => (
-                                    <TableCell align="center" key={cell.date}>{cell.date}</TableCell>
+                                    <TableCell align="center" key={cell.date}>
+                                        {cell.date}
+
+
+                                        {cell.events.map(event => (
+                                            <div>
+                                                {event.time || ""} {event.desc}
+                                            </div>
+                                        ))}
+                                    </TableCell>
+
                                 ))}
                             </TableRow>
                         ))}
@@ -87,17 +107,37 @@ export function CalendarScreen(){
 
 interface IGenerateCalendar {
     date: string;
+    events: IEvent[];
 }
 
-function generateCalendar(date: string): IGenerateCalendar[][] {
+function generateCalendar(date: string, allEvents: IEvent[]): IGenerateCalendar[][] {
     const weeks: IGenerateCalendar[][] = [];
     const data = new Date(date + "T12:00:00");
+    const currentMonth = data.getMonth();
 
-    data.setDate(1);
+    const currentDay = new Date(data.valueOf());
+    currentDay.setDate(1);
+    // Return day of Week
+    const dayWeek = currentDay.getDay();
+    currentDay.setDate(1 - dayWeek);
 
+    do {
+        const week: IGenerateCalendar[] = [];
+
+        for(let i = 0; i < daysWeek.length; i++){
+            let month = (currentDay.getMonth() + 1).toString().padStart(2, "0");
+            let day = currentDay.getDate().toString().padStart(2, "0");
+            let isoDate = `${currentDay.getFullYear()}-${month}-${day}`;
+            week.push({date: isoDate, events: allEvents.filter(e => e.date === isoDate)});
+            currentDay.setDate(currentDay.getDate() + 1);
+        }
+
+        weeks.push(week);
+    }while(currentDay.getMonth() === currentMonth);
+    
     return weeks;
 }
 
 function getToday(){
-    return "2024-04-04";
+    return "2021-06-07";
 }
