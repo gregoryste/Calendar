@@ -4,6 +4,9 @@ import { TableBody, TableCell, TableContainer, TableHead, makeStyles} from "@mat
 import { Avatar, Box, Button, Checkbox, FormControlLabel, FormGroup, Icon, IconButton, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { IEvent, ICalendar, getEventsEndpoint, getCalendarsEndpoint } from './backend';
+import { formatMonth, addMonths } from './dateFunctions';
+import { useParams } from 'react-router';
+import { Link } from "react-router-dom";
 
 const daysWeek = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sab"];
 
@@ -54,11 +57,12 @@ const useStyles = makeStyles({
 
 
 export function CalendarScreen(){
+    const { month } = useParams<{ month: string }>();
     const classes = useStyles();
     const [events, setEvents] = useState<IEvent[]>([]);
     const [calendersSelected, setCalendersSelected] = useState<boolean[]>([]);
     const [calendars, setCalendars] = useState<ICalendar[]>([]);
-    const weeks = generateCalendar(getToday(), events, calendars, calendersSelected)
+    const weeks = generateCalendar((month + "-01"), events, calendars, calendersSelected)
     const firstDate = weeks[0][0].date;
     const lastDate = weeks[weeks.length - 1][6].date;
 
@@ -101,14 +105,18 @@ export function CalendarScreen(){
             <Box flex="1" display="flex" flexDirection="column">
                 <Box display="flex" alignItems="center" padding="8px 10px">
                     <Box>
-                        <IconButton aria-label='Previous Month'>
+                        <IconButton aria-label='Previous Month' component={Link} to={"/calendar/" + addMonths(month, -1)}>
                             <Icon>chevron_left</Icon>
                         </IconButton>
-                        <IconButton aria-label='Next Month'>
+
+                        <IconButton aria-label='Next Month' component={Link} to={"/calendar/" + addMonths(month, 1)}>
                             <Icon>chevron_right</Icon>
                         </IconButton>
+
                     </Box>
-                    <Box component="h3"  marginLeft="16px" flex="1">Jule, 2021</Box>
+                    <Box component="h3"  marginLeft="16px" flex="1">
+                        {formatMonth(month)}
+                    </Box>
                     <IconButton>
                         <Avatar>
                             <Icon>person</Icon>
@@ -127,7 +135,7 @@ export function CalendarScreen(){
                         </TableHead>
                         <TableBody>
                             {weeks.map((week, i) => (
-                                <TableRow>      
+                                <TableRow key={i}>      
                                     {week.map(cell => (
                                         <TableCell align="center" key={cell.date}>
                                             <div className={classes.dayOfMonth}>{cell.dayOfMonth}</div>
@@ -210,8 +218,4 @@ function generateCalendar(date: string, allEvents: IEvent[], calendars: ICalenda
     }while(currentDay.getMonth() === currentMonth);
     
     return weeks;
-}
-
-function getToday(){
-    return "2021-06-07";
 }
