@@ -1,20 +1,20 @@
 import { CalendarScreen } from "./CalendarScreen";
-import { BrowserRouter as Router, Switch, Route, Redirect } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { getToday } from "./dateFunctions";
 
 function App() {
-
   const mesAtual = getToday().substring(0, 7);
 
   return (
-      <Router>
-        <Switch>
-          <Route path="/calendar/:month">
-            <CalendarScreen />
-          </Route>
-          <Redirect to={{ pathname: "/calendar/" + mesAtual}} />
-        </Switch>
-      </Router>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/calendar/:month" element={<CalendarScreen />} />
+        <Route
+          path="*"
+          element={<Navigate replace to={{ pathname: "/calendar/" + mesAtual }} />}
+        />
+      </Routes>
+    </BrowserRouter>
   );
 }
 
