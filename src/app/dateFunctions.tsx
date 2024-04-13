@@ -24,7 +24,6 @@ export function formatMonth(isomonth: string){
 
 export function addMonths(month: string, increment: number){
     let jsDate = new Date(month + "-01T12:00:00");
-    console.log(jsDate.getMonth() + increment)
     jsDate.setMonth(jsDate.getMonth() + increment);
     return `${jsDate.getFullYear()}-${(jsDate.getMonth() + 1).toString().padStart(2, "0")}`;
 }
