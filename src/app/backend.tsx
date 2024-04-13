@@ -4,12 +4,16 @@ export interface ICalendar {
     color: string;
 }
 
-export interface IEvent {
-    id: number;
+export interface IEditingEvent {
+    id?: number;
     date: string;
     time?: string;
     desc: string;
     calendarId: number;
+}
+
+export interface IEvent extends IEditingEvent {
+    id: number;
 }
 
 export function getCalendarsEndpoint(): Promise<ICalendar[]>{ 
@@ -24,3 +28,34 @@ export function getEventsEndpoint(from: string, to: string): Promise<IEvent[]>{
     })
 }
 
+export function createEventEndpoint(event: IEditingEvent): Promise<IEvent[]>{ 
+    return fetch(`http://localhost:7000/events`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(event)
+    }).then(response => {
+        return response.json();
+    })
+}
+
+export function updateEventEndpoint(event: IEditingEvent): Promise<IEvent[]>{ 
+    return fetch(`http://localhost:7000/events/${event.id}`, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(event)
+    }).then(response => {
+        return response.json();
+    })
+}
+
+export function deleteEventEndpoint(eventId: number): Promise<void>{ 
+    return fetch(`http://localhost:7000/events/${eventId}`, {
+        method: "DELETE"
+    }).then(response => {
+        return response.json();
+    })
+}

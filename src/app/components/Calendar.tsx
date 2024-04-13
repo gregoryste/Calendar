@@ -51,11 +51,19 @@ const daysWeek = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sab"];
 
 interface ICalendarProps {
     weeks: IGenerateCalendar[][];
+    onClickDay: (date: string) => void;
+    onClickEvent: (event: IEvent) => void;
 }
 
 export function Calendar(props: ICalendarProps){
     const classes = useStyles();
     const { weeks } = props;
+
+    function handleClick(e: React.MouseEvent, date: string){
+        if(e.target === e.currentTarget){
+            props.onClickDay(date);
+        }
+    }
 
     return (
         <>
@@ -72,14 +80,14 @@ export function Calendar(props: ICalendarProps){
                         {weeks.map((week, i) => (
                             <TableRow key={i}>
                                 {week.map(cell => (
-                                <TableCell align="center" key={cell.date}>
+                                <TableCell align="center" key={cell.date} onClick={(me) => handleClick(me, cell.date)}>
                                     <div className={classes.dayOfMonth}>{cell.dayOfMonth}</div>
 
                                     {cell.events.map(event => {
                                     const color = event.calendar.color
 
                                     return(
-                                    <button key={event.id} className={classes.event}>
+                                    <button key={event.id} className={classes.event} onClick={() => props.onClickEvent(event)}>
                                         { event.time && (
                                         <>
                                             <Icon style={{ color }} fontSize='inherit'>watch_later</Icon>
