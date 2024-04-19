@@ -2,22 +2,27 @@ import { CalendarScreen } from "./CalendarScreen";
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { getToday } from "./dateFunctions";
 import { useEffect, useState } from "react";
-import { getUserEndpoint } from "./backend";
+import { IUser, getUserEndpoint, signOutEndpoint } from "./backend";
 import { LoginScreen } from "./components/LoginScreen";
 
 function App() {
   const mesAtual = getToday().substring(0, 7);
-  const [hasSession, setHasSession] = useState(false);
+  const [user, setUser] = useState<IUser | null>(null);
 
   useEffect(() => {
-    getUserEndpoint().then(() => setHasSession(true), () => setHasSession(false));
+    getUserEndpoint().then(setUser, () => setUser(null));
   }, [])
 
-  if(hasSession){
+  function signOut(){
+    setUser(null)
+    signOutEndpoint();
+  }
+
+  if(user){
     return (
       <BrowserRouter>
         <Routes>
-          <Route path="/calendar/:month" element={<CalendarScreen />} />
+          <Route path="/calendar/:month" element={<CalendarScreen onSignOut={signOut} user={user}/>} />
           <Route
             path="*"
             element={<Navigate replace to={{ pathname: "/calendar/" + mesAtual }} />}
@@ -26,7 +31,7 @@ function App() {
       </BrowserRouter>
     );
   }else {
-    return <LoginScreen />
+    return <LoginScreen onSignIn={setUser} />
   }
 
 

@@ -2,14 +2,19 @@ import { Box, Button } from '@mui/material';
 import CalendersView from "./components/CalendersView";
 import CalendersHeader from "./components/CalendersHeader";
 import { useEffect, useState } from 'react';
-import { IEvent, ICalendar, IEditingEvent, getEventsEndpoint, getCalendarsEndpoint } from './backend';
+import { IEvent, ICalendar, IEditingEvent, getEventsEndpoint, getCalendarsEndpoint, IUser } from './backend';
 import { useParams} from 'react-router-dom';
 import { EventFormDialog } from './components/EventFormDialog';
 import { Calendar, generateCalendar } from './components/Calendar';
 import { getToday } from './dateFunctions';
 
+interface ICalendarScreenProps {
+    user: IUser
+    onSignOut: () => void;
+}
 
-export function CalendarScreen(){
+export function CalendarScreen(props: ICalendarScreenProps){
+    const { user, onSignOut } = props;
     const { month } = useParams<{ month: string | undefined }>();
     const [events, setEvents] = useState<IEvent[]>([]);
     const [calendersSelected, setCalendersSelected] = useState<boolean[]>([]);
@@ -64,7 +69,7 @@ export function CalendarScreen(){
 
             </Box>
             <Box flex="1" display="flex" flexDirection="column">
-                <CalendersHeader month={month} />
+                <CalendersHeader month={month} onSignOut={onSignOut} user={user}/>
                 <Calendar weeks={weeks} onClickDay={openNewEvent} onClickEvent={setEditingEvent} />
                 <EventFormDialog event={editingEvent} calendars={calendars} onSave={() => {setEditingEvent(null); refreshEvents();}} onCancel={() => setEditingEvent(null)}/>
             </Box>
