@@ -4,6 +4,7 @@ import { getToday } from "./dateFunctions";
 import { useEffect, useState } from "react";
 import { IUser, getUserEndpoint, signOutEndpoint } from "./backend";
 import { LoginScreen } from "./components/LoginScreen";
+import { authContext } from "./authContext";
 
 function App() {
   const mesAtual = getToday().substring(0, 7);
@@ -20,15 +21,17 @@ function App() {
 
   if(user){
     return (
-      <BrowserRouter>
-        <Routes>
-          <Route path="/calendar/:month" element={<CalendarScreen onSignOut={signOut} user={user}/>} />
-          <Route
-            path="*"
-            element={<Navigate replace to={{ pathname: "/calendar/" + mesAtual }} />}
-          />
-        </Routes>
-      </BrowserRouter>
+      <authContext.Provider value={{user, signOut}}>
+          <BrowserRouter>
+            <Routes>
+              <Route path="/calendar/:month" element={<CalendarScreen />} />
+              <Route
+                path="*"
+                element={<Navigate replace to={{ pathname: "/calendar/" + mesAtual }} />}
+              />
+            </Routes>
+          </BrowserRouter>
+      </authContext.Provider>
     );
   }else {
     return <LoginScreen onSignIn={setUser} />

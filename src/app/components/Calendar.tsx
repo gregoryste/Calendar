@@ -1,6 +1,7 @@
 import { makeStyles } from "@material-ui/core";
 import { Box, Icon, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@mui/material"
 import { ICalendar, IEvent } from "../backend";
+import { getToday } from "../dateFunctions";
 
 const useStyles = makeStyles({
     table: {
@@ -26,8 +27,17 @@ const useStyles = makeStyles({
         }
     },
     dayOfMonth: {
+        display: "inline-block",
+        height: "24px",
+        width: "24px",
+        lineHeight: "24px",
         fontWeight: 500,
         marginBottom: "4px",
+        borderRadius: "50%",
+        "&.today": {
+            backgroundColor: "#3f51b5",
+            color: "white",
+        }
     },
     event: {
         display: "flex",
@@ -81,7 +91,7 @@ export function Calendar(props: ICalendarProps){
                             <TableRow key={i}>
                                 {week.map(cell => (
                                 <TableCell align="center" key={cell.date} onClick={(me) => handleClick(me, cell.date)}>
-                                    <div className={classes.dayOfMonth}>{cell.dayOfMonth}</div>
+                                    <div className={classes.dayOfMonth + (cell.date === getToday() ? " today" : "")}>{cell.dayOfMonth}</div>
 
                                     {cell.events.map(event => {
                                     const color = event.calendar.color
