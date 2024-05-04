@@ -22,19 +22,19 @@ export interface IUser {
 }
 
 export function getCalendarsEndpoint(): Promise<ICalendar[]>{ 
-    return fetch("http://localhost:7000/calendars", {
+    return fetch("http://localhost:8000/calendars", {
         credentials: "include",
     }).then(handleResponse)
 }
 
 export function getEventsEndpoint(from: string, to: string): Promise<IEvent[]>{ 
-    return fetch(`http://localhost:7000/events?date_gte=${from}&date_lte=${to}&_sort=date,time`, {
+    return fetch(`http://localhost:8000/events?date_gte=${from}&date_lte=${to}&_sort=date,time`, {
         credentials: "include",
     }).then(handleResponse)
 }
 
 export function createEventEndpoint(event: IEditingEvent): Promise<IEvent[]>{ 
-    return fetch(`http://localhost:7000/events`, {
+    return fetch(`http://localhost:8000/events`, {
         credentials: "include",
         method: "POST",
         headers: {
@@ -45,7 +45,7 @@ export function createEventEndpoint(event: IEditingEvent): Promise<IEvent[]>{
 }
 
 export function updateEventEndpoint(event: IEditingEvent): Promise<IEvent[]>{ 
-    return fetch(`http://localhost:7000/events/${event.id}`, {
+    return fetch(`http://localhost:8000/events/${event.id}`, {
         credentials: "include",
         method: "PUT",
         headers: {
@@ -56,20 +56,20 @@ export function updateEventEndpoint(event: IEditingEvent): Promise<IEvent[]>{
 }
 
 export function deleteEventEndpoint(eventId: number): Promise<void>{ 
-    return fetch(`http://localhost:7000/events/${eventId}`, {
+    return fetch(`http://localhost:8000/events/${eventId}`, {
         credentials: "include",
         method: "DELETE"
     }).then(handleResponse)
 }
 
 export function getUserEndpoint(): Promise<IUser>{ 
-    return fetch(`http://localhost:7000/auth/user`, {
+    return fetch(`http://localhost:8000/auth/user`, {
         credentials: "include",
     }).then(handleResponse)
 }
 
 export function signInEndpoint(email: string, password: string): Promise<IUser> {
-    return fetch(`http://localhost:7000/auth/login`, {
+    return fetch(`http://localhost:8000/auth/login`, {
         credentials: "include",
         method: "POST",
         headers: {
@@ -80,7 +80,7 @@ export function signInEndpoint(email: string, password: string): Promise<IUser> 
 }
 
 export function signOutEndpoint(): Promise<IUser> {
-    return fetch(`http://localhost:7000/auth/logout`, {
+    return fetch(`http://localhost:8000/auth/logout`, {
         credentials: "include",
         method: "POST",
     }).then(handleResponse)

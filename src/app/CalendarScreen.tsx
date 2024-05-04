@@ -1,22 +1,30 @@
 import { Box, Button } from '@mui/material';
-import CalendersView from "./components/CalendersView";
+import { CalendersView } from "./components/CalendersView";
 import CalendersHeader from "./components/CalendersHeader";
-import { useEffect, useState } from 'react';
-import { IEvent, ICalendar, IEditingEvent, getEventsEndpoint, getCalendarsEndpoint } from './backend';
+import { useCallback, useEffect, useMemo, useReducer } from 'react';
+import { getEventsEndpoint, getCalendarsEndpoint } from './backend';
 import { useParams} from 'react-router-dom';
 import { EventFormDialog } from './components/EventFormDialog';
 import { Calendar, generateCalendar } from './components/Calendar';
 import { getToday } from './dateFunctions';
+import { reducer } from './calendarScreenReducer';
 
 export function CalendarScreen(){
     const { month } = useParams<{ month: string | undefined }>();
-    const [events, setEvents] = useState<IEvent[]>([]);
-    const [calendersSelected, setCalendersSelected] = useState<boolean[]>([]);
-    const [calendars, setCalendars] = useState<ICalendar[]>([]);
+    
+    const [state, dispatch] = useReducer(reducer, {
+        calendars: [],
+        calendersSelected: [],
+        events: [],
+        editingEvent: null,
+    })
 
-    const [editingEvent, setEditingEvent] = useState<IEditingEvent | null>(null);
+    const { events, calendars, calendersSelected, editingEvent } = state;
 
-    const weeks = generateCalendar(month! + "-01", events, calendars, calendersSelected)
+    const weeks = useMemo(() => {
+        return generateCalendar(month! + "-01", events, calendars, calendersSelected);
+    }, [month, events, calendars, calendersSelected]);
+
     const firstDate = weeks[0][0].date;
     const lastDate = weeks[weeks.length - 1][6].date;
 
@@ -24,29 +32,19 @@ export function CalendarScreen(){
         Promise.all([
             getCalendarsEndpoint(),
             getEventsEndpoint(firstDate, lastDate)
-        ]).then(([calenders, events]) => {
-            setCalendersSelected(calenders.map(() => true));
-            setCalendars(calenders)
-            setEvents(events)
+        ]).then(([calendars, events]) => {
+            dispatch({type: "load", payload: { events, calendars }});
         })
     }, [firstDate, lastDate]);
-
-    function toggleCalendar(i: number){
-        const newValue = [...calendersSelected];
-        newValue[i] = !newValue[i];
-        setCalendersSelected(newValue);
-    }
-
-    function openNewEvent(date: string){
-        setEditingEvent({
-            date: date,
-            desc: "",
-            calendarId: calendars[0].id,
-        })
-    }
+    
+    const closeDialog = useCallback(() => {
+        dispatch({ type: "closeDialog"}); 
+    }, []);     
 
     function refreshEvents(){
-        getEventsEndpoint(firstDate, lastDate).then(setEvents)
+        getEventsEndpoint(firstDate, lastDate).then((events) => {
+            dispatch({type: "load", payload: { events }})
+        });
     }
 
     return (
@@ -54,18 +52,18 @@ export function CalendarScreen(){
         <Box display="flex" height="100%" alignItems="stretch">
             <Box borderRight="1px solid rgba(244, 244, 244, 1)" width="16em" padding="8px 16px" display="flex" flexDirection="column" gap={3}>
                 <h2>Agenda React</h2>
-                <Button variant='contained' color='primary' onClick={() => openNewEvent(getToday())}>Novo Evento</Button>
+                <Button variant='contained' color='primary' onClick={() => dispatch({type: "new", payload: getToday()})}>Novo Evento</Button>
                 <CalendersView 
                     calendars={calendars}
-                    toggleCalendar={toggleCalendar}
+                    dispatch={dispatch}
                     calendersSelected={calendersSelected}
                 />             
 
             </Box>
             <Box flex="1" display="flex" flexDirection="column">
                 <CalendersHeader month={month}/>
-                <Calendar weeks={weeks} onClickDay={openNewEvent} onClickEvent={setEditingEvent} />
-                <EventFormDialog event={editingEvent} calendars={calendars} onSave={() => {setEditingEvent(null); refreshEvents();}} onCancel={() => setEditingEvent(null)}/>
+                <Calendar weeks={weeks} dispatch={dispatch} />
+                <EventFormDialog event={editingEvent} calendars={calendars} onSave={() => {closeDialog(); refreshEvents();}} onCancel={closeDialog}/>
             </Box>
         </Box>
         </>

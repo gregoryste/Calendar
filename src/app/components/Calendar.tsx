@@ -2,6 +2,8 @@ import { makeStyles } from "@material-ui/core";
 import { Box, Icon, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@mui/material"
 import { ICalendar, IEvent } from "../backend";
 import { getToday } from "../dateFunctions";
+import React from "react";
+import { ICalendarScreenAction } from "../calendarScreenReducer";
 
 const useStyles = makeStyles({
     table: {
@@ -61,17 +63,16 @@ const daysWeek = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sab"];
 
 interface ICalendarProps {
     weeks: IGenerateCalendar[][];
-    onClickDay: (date: string) => void;
-    onClickEvent: (event: IEvent) => void;
+    dispatch: React.Dispatch<ICalendarScreenAction>;
 }
 
-export function Calendar(props: ICalendarProps){
+export const Calendar = React.memo(function(props: ICalendarProps){
     const classes = useStyles();
     const { weeks } = props;
 
     function handleClick(e: React.MouseEvent, date: string){
         if(e.target === e.currentTarget){
-            props.onClickDay(date);
+            props.dispatch({type: "new", payload: date});
         }
     }
 
@@ -97,7 +98,7 @@ export function Calendar(props: ICalendarProps){
                                     const color = event.calendar.color
 
                                     return(
-                                    <button key={event.id} className={classes.event} onClick={() => props.onClickEvent(event)}>
+                                    <button key={event.id} className={classes.event} onClick={() => props.dispatch({type: "edit", payload: event})}>
                                         { event.time && (
                                         <>
                                             <Icon style={{ color }} fontSize='inherit'>watch_later</Icon>
@@ -121,7 +122,7 @@ export function Calendar(props: ICalendarProps){
             </TableContainer>
         </>
     )
-}
+})
 
 
 export type IEventWithCalendar = IEvent & { calendar: ICalendar };
@@ -133,6 +134,7 @@ export interface IGenerateCalendar {
 }
 
 export function generateCalendar(date: string, allEvents: IEvent[], calendars: ICalendar[], calendersSelected: boolean[]): IGenerateCalendar[][] {
+    console.log("teste");
     const weeks: IGenerateCalendar[][] = [];
     const data = new Date(date + "T12:00:00");
     const currentMonth = data.getMonth();
