@@ -9,15 +9,14 @@ import { Calendar, generateCalendar } from './components/Calendar';
 import { getToday } from './dateFunctions';
 import { reducer } from './calendarScreenReducer';
 
-export function CalendarScreen(){
-    const { month } = useParams<{ month: string | undefined }>();
+function useCalendarScreenState(month: string | undefined){
     
     const [state, dispatch] = useReducer(reducer, {
         calendars: [],
         calendersSelected: [],
         events: [],
         editingEvent: null,
-    })
+    });
 
     const { events, calendars, calendersSelected, editingEvent } = state;
 
@@ -36,16 +35,30 @@ export function CalendarScreen(){
             dispatch({type: "load", payload: { events, calendars }});
         })
     }, [firstDate, lastDate]);
-    
-    const closeDialog = useCallback(() => {
-        dispatch({ type: "closeDialog"}); 
-    }, []);     
 
     function refreshEvents(){
         getEventsEndpoint(firstDate, lastDate).then((events) => {
             dispatch({type: "load", payload: { events }})
         });
     }
+
+    return {
+        weeks,
+        calendars,
+        dispatch,
+        refreshEvents,
+        calendersSelected, 
+        editingEvent
+    }
+}
+
+export function CalendarScreen(){
+    const { month } = useParams<{ month: string | undefined }>();
+    const { weeks, calendars, dispatch, refreshEvents, calendersSelected, editingEvent } = useCalendarScreenState(month);
+
+    const closeDialog = useCallback(() => {
+        dispatch({ type: "closeDialog"}); 
+    }, []);     
 
     return (
         <>

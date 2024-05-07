@@ -1,7 +1,7 @@
 import { Avatar, Box, Button, Icon, IconButton, Menu, MenuItem } from "@mui/material";
 import { makeStyles } from "@material-ui/core";
-import React, { useContext, useState } from "react";
-import { authContext } from "../authContext";
+import React, { useState } from "react";
+import {  useAuthContext } from "../authContext";   
 
 const useStyles = makeStyles({
     userDetails: {
@@ -18,7 +18,7 @@ const useStyles = makeStyles({
 })
 
 export function UserMenu(){
-    const { user, signOut } = useContext(authContext);
+    const { user, signOut } = useAuthContext();
 
     const classes = useStyles();
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
